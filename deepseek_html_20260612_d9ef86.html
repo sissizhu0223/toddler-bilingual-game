@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>宝宝双语认知乐园 - 中文 & Español | Emoji趣味版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(145deg, #b8e1fc 0%, #f9e6b3 100%);
+            font-family: 'Comic Neue', 'Comic Sans MS', 'Segoe UI Emoji', 'Chalkboard SE', cursive, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(255, 248, 225, 0.95);
+            border-radius: 80px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
+            padding: 20px 25px 35px;
+        }
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 0 15px;
+        }
+        .score-area {
+            background: #ffefc0;
+            padding: 8px 20px;
+            border-radius: 60px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #d64933;
+            box-shadow: inset 0 -2px 0 #c29b4a, 0 6px 12px rgba(0,0,0,0.1);
+        }
+        .score-area span { font-size: 2rem; color: #2b6e4e; }
+        .new-quiz-btn {
+            background: #ffa559;
+            border: none;
+            font-size: 1.3rem;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #b4622a;
+            transition: 0.05s linear;
+            font-family: inherit;
+        }
+        .new-quiz-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #b4622a; }
+        .question-zone {
+            background: #fff9ed;
+            border-radius: 70px;
+            margin: 10px 0 30px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+        }
+        .speak-panel {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .audio-btn {
+            background: #fbd26a;
+            border: none;
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 12px 28px;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #b87333;
+            transition: 0.05s linear;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            color: #3b2a1f;
+        }
+        .audio-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #b87333; }
+        .lang-icon { font-size: 1.9rem; }
+        .target-word-hint {
+            font-size: 1.6rem;
+            background: #e3f0e8;
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 50px;
+            color: #2c5a2e;
+            font-weight: bold;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin: 25px 0 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 48px;
+            padding: 30px 12px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            box-shadow: 0 15px 20px rgba(0, 0, 0, 0.2);
+            border: 4px solid #ffdd99;
+        }
+        .card:active { transform: scale(0.97); }
+        .card-emoji {
+            font-size: 5rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+        .word-label {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4a6a3b;
+            background: #fff2cf;
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 60px;
+        }
+        .feedback-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            font-weight: bold;
+            z-index: 200;
+            pointer-events: none;
+            animation: fadePop 0.6s forwards;
+            background: rgba(255,255,240,0.9);
+            padding: 20px 40px;
+            border-radius: 100px;
+            white-space: nowrap;
+        }
+        @keyframes fadePop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5);}
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2);}
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8);}
+        }
+        .footer-note {
+            text-align: center;
+            font-size: 1rem;
+            color: #a5662a;
+            margin-top: 10px;
+        }
+        @media (max-width: 600px) {
+            .game-container { padding: 15px; }
+            .audio-btn { font-size: 1.2rem; padding: 8px 20px; }
+            .score-area { font-size: 1.2rem; }
+            .cards-grid { gap: 12px; }
+            .word-label { font-size: 0.9rem; }
+            .card-emoji { font-size: 3rem; }
+            .feedback-overlay { font-size: 2.5rem; padding: 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="game-header">
+        <div class="score-area">🏆 得分 <span id="scoreValue">0</span></div>
+        <button class="new-quiz-btn" id="nextGameBtn">🎲 新题目 🎲</button>
+    </div>
+    <div class="question-zone">
+        <div class="speak-panel">
+            <button class="audio-btn" id="playChineseBtn">🇨🇳 中文 <span class="lang-icon">🔊</span></button>
+            <button class="audio-btn" id="playSpanishBtn">🇪🇸 Español <span class="lang-icon">🔊</span></button>
+        </div>
+        <div class="target-word-hint" id="targetHint">⭐ 点击喇叭听单词，再点图片 ⭐</div>
+    </div>
+    <div class="cards-grid" id="cardsContainer"></div>
+    <div class="footer-note">🌟 点击图片选择 — 答对✅得分并换题，答错❌可以继续尝试 🌟</div>
+</div>
+
+<script>
+    // Emoji 实物词库（无需下载图片，开箱即用）
+    const vocabulary = [
+        { cn: "苹果", es: "manzana", emoji: "🍎" },
+        { cn: "香蕉", es: "plátano", emoji: "🍌" },
+        { cn: "猫", es: "gato", emoji: "🐱" },
+        { cn: "狗", es: "perro", emoji: "🐶" },
+        { cn: "鸟", es: "pájaro", emoji: "🐦" },
+        { cn: "鱼", es: "pez", emoji: "🐟" },
+        { cn: "车", es: "coche", emoji: "🚗" },
+        { cn: "球", es: "pelota", emoji: "⚽" },
+        { cn: "花", es: "flor", emoji: "🌸" },
+        { cn: "太阳", es: "sol", emoji: "☀️" },
+        { cn: "月亮", es: "luna", emoji: "🌙" },
+        { cn: "星星", es: "estrella", emoji: "⭐" },
+        { cn: "大象", es: "elefante", emoji: "🐘" },
+        { cn: "长颈鹿", es: "jirafa", emoji: "🦒" },
+        { cn: "猴子", es: "mono", emoji: "🐒" },
+        { cn: "兔子", es: "conejo", emoji: "🐰" },
+        { cn: "熊", es: "oso", emoji: "🐻" },
+        { cn: "青蛙", es: "rana", emoji: "🐸" },
+        { cn: "蝴蝶", es: "mariposa", emoji: "🦋" },
+        { cn: "蜜蜂", es: "abeja", emoji: "🐝" },
+        { cn: "牛奶", es: "leche", emoji: "🥛" },
+        { cn: "水", es: "agua", emoji: "💧" },
+        { cn: "面包", es: "pan", emoji: "🍞" },
+        { cn: "鸡蛋", es: "huevo", emoji: "🥚" },
+        { cn: "奶酪", es: "queso", emoji: "🧀" },
+        { cn: "米饭", es: "arroz", emoji: "🍚" },
+        { cn: "面条", es: "fideos", emoji: "🍜" },
+        { cn: "饼干", es: "galleta", emoji: "🍪" },
+        { cn: "糖果", es: "caramelo", emoji: "🍬" },
+        { cn: "冰淇淋", es: "helado", emoji: "🍦" },
+        { cn: "帽子", es: "sombrero", emoji: "🧢" },
+        { cn: "鞋子", es: "zapato", emoji: "👟" },
+        { cn: "袜子", es: "calcetín", emoji: "🧦" },
+        { cn: "裤子", es: "pantalón", emoji: "👖" },
+        { cn: "裙子", es: "vestido", emoji: "👗" },
+        { cn: "牙刷", es: "cepillo de dientes", emoji: "🪥" },
+        { cn: "床", es: "cama", emoji: "🛏️" },
+        { cn: "椅子", es: "silla", emoji: "🪑" },
+        { cn: "桌子", es: "mesa", emoji: "🪵" },
+        { cn: "门", es: "puerta", emoji: "🚪" },
+        { cn: "窗户", es: "ventana", emoji: "🪟" },
+        { cn: "房子", es: "casa", emoji: "🏠" },
+        { cn: "树", es: "árbol", emoji: "🌳" },
+        { cn: "叶子", es: "hoja", emoji: "🍃" },
+        { cn: "石头", es: "piedra", emoji: "🪨" },
+        { cn: "海", es: "mar", emoji: "🌊" },
+        { cn: "云", es: "nube", emoji: "☁️" },
+        { cn: "雨", es: "lluvia", emoji: "🌧️" },
+        { cn: "雪", es: "nieve", emoji: "❄️" },
+        { cn: "宝宝", es: "bebé", emoji: "👶" },
+        { cn: "爸爸", es: "papá", emoji: "👨" },
+        { cn: "妈妈", es: "mamá", emoji: "👩" },
+        { cn: "笑脸", es: "sonrisa", emoji: "😊" },
+        { cn: "心形", es: "corazón", emoji: "❤️" },
+        { cn: "红色", es: "rojo", emoji: "🔴" },
+        { cn: "蓝色", es: "azul", emoji: "🔵" },
+        { cn: "黄色", es: "amarillo", emoji: "🟡" },
+        { cn: "绿色", es: "verde", emoji: "🟢" },
+        { cn: "橙色", es: "naranja", emoji: "🟠" },
+        { cn: "紫色", es: "morado", emoji: "🟣" },
+        { cn: "粉色", es: "rosa", emoji: "🌸" },
+        { cn: "自行车", es: "bicicleta", emoji: "🚲" },
+        { cn: "火车", es: "tren", emoji: "🚂" },
+        { cn: "飞机", es: "avión", emoji: "✈️" },
+        { cn: "气球", es: "globo", emoji: "🎈" },
+        { cn: "玩具熊", es: "oso de peluche", emoji: "🧸" },
+        { cn: "积木", es: "bloque", emoji: "🧱" },
+        { cn: "蜡笔", es: "crayón", emoji: "🖍️" },
+        { cn: "书", es: "libro", emoji: "📚" },
+        { cn: "钟表", es: "reloj", emoji: "⏰" },
+        { cn: "电话", es: "teléfono", emoji: "📞" },
+        { cn: "电脑", es: "computadora", emoji: "💻" },
+        { cn: "电视", es: "televisión", emoji: "📺" },
+        { cn: "雨伞", es: "paraguas", emoji: "☂️" },
+        { cn: "眼镜", es: "gafas", emoji: "👓" },
+        { cn: "钥匙", es: "llave", emoji: "🔑" },
+        { cn: "鼓", es: "tambor", emoji: "🥁" },
+        { cn: "吉他", es: "guitarra", emoji: "🎸" },
+        { cn: "小船", es: "barco", emoji: "⛵" },
+        { cn: "卡车", es: "camión", emoji: "🚛" },
+        { cn: "葡萄", es: "uva", emoji: "🍇" },
+        { cn: "西瓜", es: "sandía", emoji: "🍉" },
+        { cn: "草莓", es: "fresa", emoji: "🍓" },
+        { cn: "玉米", es: "maíz", emoji: "🌽" },
+        { cn: "胡萝卜", es: "zanahoria", emoji: "🥕" },
+        { cn: "西红柿", es: "tomate", emoji: "🍅" },
+        { cn: "洋葱", es: "cebolla", emoji: "🧅" },
+        { cn: "柠檬", es: "limón", emoji: "🍋" },
+        { cn: "挖掘机", es: "excavadora", emoji: "🏗️" },
+        { cn: "企鹅", es: "pingüino", emoji: "🐧" },
+        { cn: "老虎", es: "tigre", emoji: "🐯" }
+    ];
+
+    let currentQuestionWord = null;
+    let currentOptions = [];
+    let currentScore = 0;
+    let canSelect = true;
+    let speechSynth = window.speechSynthesis;
+
+    function stopSpeaking() { if (speechSynth.speaking) speechSynth.cancel(); }
+    function speakText(text, lang) {
+        if (!text) return;
+        stopSpeaking();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
+        utterance.rate = 0.85;
+        utterance.pitch = 1.15;
+        speechSynth.speak(utterance);
+    }
+
+    function playCorrectSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const gain = ctx.createGain();
+            gain.connect(ctx.destination);
+            gain.gain.value = 0.25;
+            const osc1 = ctx.createOscillator();
+            osc1.type = 'sine';
+            osc1.frequency.value = 880;
+            osc1.connect(gain);
+            osc1.start();
+            osc1.stop(ctx.currentTime + 0.2);
+            const osc2 = ctx.createOscillator();
+            osc2.type = 'sine';
+            osc2.frequency.value = 1100;
+            osc2.connect(gain);
+            osc2.start(ctx.currentTime + 0.1);
+            osc2.stop(ctx.currentTime + 0.35);
+            setTimeout(() => ctx.close(), 500);
+        } catch(e) {}
+    }
+    function playWrongSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const gain = ctx.createGain();
+            gain.connect(ctx.destination);
+            gain.gain.value = 0.2;
+            const osc = ctx.createOscillator();
+            osc.type = 'sawtooth';
+            osc.frequency.value = 480;
+            osc.connect(gain);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.45);
+            osc.stop(ctx.currentTime + 0.45);
+            setTimeout(() => ctx.close(), 500);
+        } catch(e) {}
+    }
+    function showFeedback(isCorrect) {
+        const div = document.createElement('div');
+        div.className = 'feedback-overlay';
+        div.innerHTML = isCorrect ? '✅ ✔️ 答对了！' : '❌ ✘ 再试试看';
+        if (isCorrect) div.style.backgroundColor = "#d4edda";
+        else div.style.backgroundColor = "#f8d7da";
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 700);
+        if (isCorrect) playCorrectSound();
+        else playWrongSound();
+    }
+
+    function renderCards() {
+        const container = document.getElementById('cardsContainer');
+        container.innerHTML = '';
+        currentOptions.forEach(opt => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <div class="card-emoji">${opt.emoji}</div>
+                <div class="word-label">${opt.cn} | ${opt.es}</div>
+            `;
+            card.addEventListener('click', () => {
+                if (!canSelect) return;
+                const isMatch = (opt.cn === currentQuestionWord.cn && opt.es === currentQuestionWord.es);
+                if (isMatch) {
+                    showFeedback(true);
+                    currentScore++;
+                    document.getElementById('scoreValue').innerText = currentScore;
+                    canSelect = false;
+                    setTimeout(() => loadNewQuiz(), 800);
+                } else {
+                    showFeedback(false);
+                }
+            });
+            container.appendChild(card);
+        });
+    }
+
+    function generateRandomQuiz() {
+        const targetIndex = Math.floor(Math.random() * vocabulary.length);
+        const target = { ...vocabulary[targetIndex] };
+        const selected = new Set();
+        selected.add(targetIndex);
+        while (selected.size < 4) {
+            selected.add(Math.floor(Math.random() * vocabulary.length));
+        }
+        let options = Array.from(selected).map(i => ({ ...vocabulary[i] }));
+        for (let i = options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [options[i], options[j]] = [options[j], options[i]];
+        }
+        return { target, options };
+    }
+
+    function loadNewQuiz() {
+        const { target, options } = generateRandomQuiz();
+        currentQuestionWord = target;
+        currentOptions = options;
+        renderCards();
+        document.getElementById('targetHint').innerHTML = `🎈 听一听，点一点: ${target.cn} · ${target.es} 🎈`;
+        canSelect = true;
+    }
+
+    function playChinese() { speakText(currentQuestionWord.cn, 'zh-CN'); }
+    function playSpanish() { speakText(currentQuestionWord.es, 'es-ES'); }
+
+    document.getElementById('playChineseBtn').addEventListener('click', playChinese);
+    document.getElementById('playSpanishBtn').addEventListener('click', playSpanish);
+    document.getElementById('nextGameBtn').addEventListener('click', () => { if (canSelect) loadNewQuiz(); });
+
+    loadNewQuiz();
+</script>
+</body>
+</html>
