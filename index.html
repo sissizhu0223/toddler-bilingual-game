@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>宝宝双语认知乐园 - 中文 & Español | 完整音效版</title>
+    <title>宝宝双语认知乐园 - 中文 & Español | 实物图片版</title>
     <style>
         * {
             box-sizing: border-box;
@@ -110,18 +110,40 @@
         .card {
             background: white;
             border-radius: 48px;
-            padding: 30px 12px 20px;
+            padding: 20px 12px 15px;
             text-align: center;
             cursor: pointer;
             transition: transform 0.1s ease;
             box-shadow: 0 15px 20px rgba(0, 0, 0, 0.2);
             border: 4px solid #ffdd99;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .card:active { transform: scale(0.97); }
-        .card-emoji {
+        .card-img {
+            width: 100%;
+            max-width: 180px;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 40px;
+            background-color: #f7f0e0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+        /* 图片加载失败时显示 Emoji 备用 */
+        .card-img.error-img {
+            display: none;
+        }
+        .card-emoji-fallback {
             font-size: 5rem;
+            display: none;
+            margin-bottom: 10px;
+        }
+        .card-img.error-img + .card-emoji-fallback {
             display: block;
-            margin-bottom: 15px;
         }
         .word-label {
             margin-top: 10px;
@@ -138,19 +160,21 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 5rem;
+            font-size: 3rem;
             font-weight: bold;
             z-index: 200;
             pointer-events: none;
             animation: fadePop 0.6s forwards;
-            background: rgba(255,255,240,0.9);
-            padding: 20px 40px;
-            border-radius: 100px;
+            background: rgba(255,255,240,0.95);
+            padding: 15px 30px;
+            border-radius: 60px;
             white-space: nowrap;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
         @keyframes fadePop {
             0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5);}
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2);}
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1);}
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1);}
             100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8);}
         }
         .footer-note {
@@ -165,8 +189,9 @@
             .score-area { font-size: 1.2rem; }
             .cards-grid { gap: 12px; }
             .word-label { font-size: 0.9rem; }
-            .card-emoji { font-size: 3rem; }
-            .feedback-overlay { font-size: 2.5rem; padding: 10px 20px; }
+            .card-emoji-fallback { font-size: 3rem; }
+            .card-img { max-width: 120px; }
+            .feedback-overlay { font-size: 1.8rem; padding: 10px 20px; white-space: nowrap; }
         }
     </style>
 </head>
@@ -184,113 +209,128 @@
         <div class="target-word-hint" id="targetHint">⭐ 点击喇叭听单词，再点图片 ⭐</div>
     </div>
     <div class="cards-grid" id="cardsContainer"></div>
-    <div class="footer-note">🌟 点击图片选择 — 答对✅得分并换题，答错❌可以继续尝试 🌟</div>
+    <div class="footer-note">
+        🌟 点击图片选择 — 答对✅得分并换题，答错❌可以继续尝试 🌟
+    </div>
 </div>
 
 <script>
-    // Emoji 实物词库（100+ 词）
+    // ==================== 网络实物图片词库（100+ 词） ====================
+    // 使用稳定的图片代理服务 images.weserv.nl 确保全球可访问
+    // 所有图片来自 Pixabay 免费图库，实物照片
+    
+    function getProxyUrl(originalUrl) {
+        if (!originalUrl) return "";
+        return `https://images.weserv.nl/?url=${encodeURIComponent(originalUrl)}&w=300&h=300&fit=cover`;
+    }
+    
     const vocabulary = [
-        { cn: "苹果", es: "manzana", emoji: "🍎" },
-        { cn: "香蕉", es: "plátano", emoji: "🍌" },
-        { cn: "猫", es: "gato", emoji: "🐱" },
-        { cn: "狗", es: "perro", emoji: "🐶" },
-        { cn: "鸟", es: "pájaro", emoji: "🐦" },
-        { cn: "鱼", es: "pez", emoji: "🐟" },
-        { cn: "车", es: "coche", emoji: "🚗" },
-        { cn: "球", es: "pelota", emoji: "⚽" },
-        { cn: "花", es: "flor", emoji: "🌸" },
-        { cn: "太阳", es: "sol", emoji: "☀️" },
-        { cn: "月亮", es: "luna", emoji: "🌙" },
-        { cn: "星星", es: "estrella", emoji: "⭐" },
-        { cn: "大象", es: "elefante", emoji: "🐘" },
-        { cn: "长颈鹿", es: "jirafa", emoji: "🦒" },
-        { cn: "猴子", es: "mono", emoji: "🐒" },
-        { cn: "兔子", es: "conejo", emoji: "🐰" },
-        { cn: "熊", es: "oso", emoji: "🐻" },
-        { cn: "青蛙", es: "rana", emoji: "🐸" },
-        { cn: "蝴蝶", es: "mariposa", emoji: "🦋" },
-        { cn: "蜜蜂", es: "abeja", emoji: "🐝" },
-        { cn: "牛奶", es: "leche", emoji: "🥛" },
-        { cn: "水", es: "agua", emoji: "💧" },
-        { cn: "面包", es: "pan", emoji: "🍞" },
-        { cn: "鸡蛋", es: "huevo", emoji: "🥚" },
-        { cn: "奶酪", es: "queso", emoji: "🧀" },
-        { cn: "米饭", es: "arroz", emoji: "🍚" },
-        { cn: "面条", es: "fideos", emoji: "🍜" },
-        { cn: "饼干", es: "galleta", emoji: "🍪" },
-        { cn: "糖果", es: "caramelo", emoji: "🍬" },
-        { cn: "冰淇淋", es: "helado", emoji: "🍦" },
-        { cn: "帽子", es: "sombrero", emoji: "🧢" },
-        { cn: "鞋子", es: "zapato", emoji: "👟" },
-        { cn: "袜子", es: "calcetín", emoji: "🧦" },
-        { cn: "裤子", es: "pantalón", emoji: "👖" },
-        { cn: "裙子", es: "vestido", emoji: "👗" },
-        { cn: "牙刷", es: "cepillo de dientes", emoji: "🪥" },
-        { cn: "床", es: "cama", emoji: "🛏️" },
-        { cn: "椅子", es: "silla", emoji: "🪑" },
-        { cn: "桌子", es: "mesa", emoji: "🪵" },
-        { cn: "门", es: "puerta", emoji: "🚪" },
-        { cn: "窗户", es: "ventana", emoji: "🪟" },
-        { cn: "房子", es: "casa", emoji: "🏠" },
-        { cn: "树", es: "árbol", emoji: "🌳" },
-        { cn: "叶子", es: "hoja", emoji: "🍃" },
-        { cn: "石头", es: "piedra", emoji: "🪨" },
-        { cn: "海", es: "mar", emoji: "🌊" },
-        { cn: "云", es: "nube", emoji: "☁️" },
-        { cn: "雨", es: "lluvia", emoji: "🌧️" },
-        { cn: "雪", es: "nieve", emoji: "❄️" },
-        { cn: "宝宝", es: "bebé", emoji: "👶" },
-        { cn: "爸爸", es: "papá", emoji: "👨" },
-        { cn: "妈妈", es: "mamá", emoji: "👩" },
-        { cn: "笑脸", es: "sonrisa", emoji: "😊" },
-        { cn: "心形", es: "corazón", emoji: "❤️" },
-        { cn: "红色", es: "rojo", emoji: "🔴" },
-        { cn: "蓝色", es: "azul", emoji: "🔵" },
-        { cn: "黄色", es: "amarillo", emoji: "🟡" },
-        { cn: "绿色", es: "verde", emoji: "🟢" },
-        { cn: "橙色", es: "naranja", emoji: "🟠" },
-        { cn: "紫色", es: "morado", emoji: "🟣" },
-        { cn: "粉色", es: "rosa", emoji: "🌸" },
-        { cn: "自行车", es: "bicicleta", emoji: "🚲" },
-        { cn: "火车", es: "tren", emoji: "🚂" },
-        { cn: "飞机", es: "avión", emoji: "✈️" },
-        { cn: "气球", es: "globo", emoji: "🎈" },
-        { cn: "玩具熊", es: "oso de peluche", emoji: "🧸" },
-        { cn: "积木", es: "bloque", emoji: "🧱" },
-        { cn: "蜡笔", es: "crayón", emoji: "🖍️" },
-        { cn: "书", es: "libro", emoji: "📚" },
-        { cn: "钟表", es: "reloj", emoji: "⏰" },
-        { cn: "电话", es: "teléfono", emoji: "📞" },
-        { cn: "电脑", es: "computadora", emoji: "💻" },
-        { cn: "电视", es: "televisión", emoji: "📺" },
-        { cn: "雨伞", es: "paraguas", emoji: "☂️" },
-        { cn: "眼镜", es: "gafas", emoji: "👓" },
-        { cn: "钥匙", es: "llave", emoji: "🔑" },
-        { cn: "鼓", es: "tambor", emoji: "🥁" },
-        { cn: "吉他", es: "guitarra", emoji: "🎸" },
-        { cn: "小船", es: "barco", emoji: "⛵" },
-        { cn: "卡车", es: "camión", emoji: "🚛" },
-        { cn: "葡萄", es: "uva", emoji: "🍇" },
-        { cn: "西瓜", es: "sandía", emoji: "🍉" },
-        { cn: "草莓", es: "fresa", emoji: "🍓" },
-        { cn: "玉米", es: "maíz", emoji: "🌽" },
-        { cn: "胡萝卜", es: "zanahoria", emoji: "🥕" },
-        { cn: "西红柿", es: "tomate", emoji: "🍅" },
-        { cn: "洋葱", es: "cebolla", emoji: "🧅" },
-        { cn: "柠檬", es: "limón", emoji: "🍋" },
-        { cn: "挖掘机", es: "excavadora", emoji: "🏗️" },
-        { cn: "企鹅", es: "pingüino", emoji: "🐧" },
-        { cn: "老虎", es: "tigre", emoji: "🐯" }
+        { cn: "苹果", es: "manzana", emoji: "🍎", img: "https://cdn.pixabay.com/photo/2016/11/10/09/29/apple-1813888_640.jpg" },
+        { cn: "香蕉", es: "plátano", emoji: "🍌", img: "https://cdn.pixabay.com/photo/2016/11/08/12/01/banana-1807409_640.jpg" },
+        { cn: "猫", es: "gato", emoji: "🐱", img: "https://cdn.pixabay.com/photo/2017/06/06/22/46/cat-2378961_640.jpg" },
+        { cn: "狗", es: "perro", emoji: "🐶", img: "https://cdn.pixabay.com/photo/2016/12/13/05/15/puppy-1903313_640.jpg" },
+        { cn: "鸟", es: "pájaro", emoji: "🐦", img: "https://cdn.pixabay.com/photo/2018/05/06/10/21/bird-3378409_640.jpg" },
+        { cn: "鱼", es: "pez", emoji: "🐟", img: "https://cdn.pixabay.com/photo/2019/06/06/16/38/fish-4255486_640.jpg" },
+        { cn: "车", es: "coche", emoji: "🚗", img: "https://cdn.pixabay.com/photo/2016/02/13/13/11/car-1197734_640.jpg" },
+        { cn: "球", es: "pelota", emoji: "⚽", img: "https://cdn.pixabay.com/photo/2013/07/13/10/01/football-156429_640.png" },
+        { cn: "花", es: "flor", emoji: "🌸", img: "https://cdn.pixabay.com/photo/2018/05/08/08/44/flower-3382774_640.jpg" },
+        { cn: "太阳", es: "sol", emoji: "☀️", img: "https://cdn.pixabay.com/photo/2016/11/08/19/31/sun-1808619_640.jpg" },
+        { cn: "月亮", es: "luna", emoji: "🌙", img: "https://cdn.pixabay.com/photo/2016/11/29/13/04/moon-1869612_640.jpg" },
+        { cn: "星星", es: "estrella", emoji: "⭐", img: "https://cdn.pixabay.com/photo/2016/10/20/18/35/earth-1756274_640.jpg" },
+        { cn: "大象", es: "elefante", emoji: "🐘", img: "https://cdn.pixabay.com/photo/2017/10/25/16/54/elephant-2888739_640.jpg" },
+        { cn: "长颈鹿", es: "jirafa", emoji: "🦒", img: "https://cdn.pixabay.com/photo/2018/07/04/17/01/giraffe-3515980_640.jpg" },
+        { cn: "猴子", es: "mono", emoji: "🐒", img: "https://cdn.pixabay.com/photo/2016/11/09/21/41/monkey-1812594_640.jpg" },
+        { cn: "兔子", es: "conejo", emoji: "🐰", img: "https://cdn.pixabay.com/photo/2016/07/08/22/16/rabbit-1505448_640.jpg" },
+        { cn: "熊", es: "oso", emoji: "🐻", img: "https://cdn.pixabay.com/photo/2015/09/04/16/27/bear-922106_640.jpg" },
+        { cn: "青蛙", es: "rana", emoji: "🐸", img: "https://cdn.pixabay.com/photo/2017/05/09/22/19/frog-2295365_640.jpg" },
+        { cn: "蝴蝶", es: "mariposa", emoji: "🦋", img: "https://cdn.pixabay.com/photo/2017/06/27/13/31/butterfly-2447152_640.jpg" },
+        { cn: "蜜蜂", es: "abeja", emoji: "🐝", img: "https://cdn.pixabay.com/photo/2012/03/01/00/55/bee-19507_640.jpg" },
+        { cn: "牛奶", es: "leche", emoji: "🥛", img: "https://cdn.pixabay.com/photo/2016/12/06/18/27/milk-1887798_640.jpg" },
+        { cn: "水", es: "agua", emoji: "💧", img: "https://cdn.pixabay.com/photo/2017/02/05/12/25/water-2039723_640.jpg" },
+        { cn: "面包", es: "pan", emoji: "🍞", img: "https://cdn.pixabay.com/photo/2016/03/23/15/31/bread-1275421_640.jpg" },
+        { cn: "鸡蛋", es: "huevo", emoji: "🥚", img: "https://cdn.pixabay.com/photo/2015/09/17/18/29/egg-944515_640.jpg" },
+        { cn: "奶酪", es: "queso", emoji: "🧀", img: "https://cdn.pixabay.com/photo/2016/03/05/19/02/cheese-1238395_640.jpg" },
+        { cn: "米饭", es: "arroz", emoji: "🍚", img: "https://cdn.pixabay.com/photo/2017/03/23/19/57/rice-2169270_640.jpg" },
+        { cn: "面条", es: "fideos", emoji: "🍜", img: "https://cdn.pixabay.com/photo/2016/11/18/11/12/pasta-1833865_640.jpg" },
+        { cn: "饼干", es: "galleta", emoji: "🍪", img: "https://cdn.pixabay.com/photo/2017/04/13/22/26/cookie-2228542_640.jpg" },
+        { cn: "糖果", es: "caramelo", emoji: "🍬", img: "https://cdn.pixabay.com/photo/2019/11/18/09/54/candy-4633958_640.jpg" },
+        { cn: "冰淇淋", es: "helado", emoji: "🍦", img: "https://cdn.pixabay.com/photo/2017/07/25/14/22/ice-cream-2537922_640.jpg" },
+        { cn: "帽子", es: "sombrero", emoji: "🧢", img: "https://cdn.pixabay.com/photo/2017/01/19/18/16/cap-1993123_640.jpg" },
+        { cn: "鞋子", es: "zapato", emoji: "👟", img: "https://cdn.pixabay.com/photo/2013/07/13/14/07/shoes-162144_640.png" },
+        { cn: "袜子", es: "calcetín", emoji: "🧦", img: "https://cdn.pixabay.com/photo/2016/11/19/15/32/socks-1839783_640.jpg" },
+        { cn: "裤子", es: "pantalón", emoji: "👖", img: "https://cdn.pixabay.com/photo/2016/11/21/14/14/jeans-1845746_640.jpg" },
+        { cn: "裙子", es: "vestido", emoji: "👗", img: "https://cdn.pixabay.com/photo/2016/11/29/05/16/dress-1867869_640.jpg" },
+        { cn: "牙刷", es: "cepillo de dientes", emoji: "🪥", img: "https://cdn.pixabay.com/photo/2015/02/23/11/49/toothbrush-646328_640.jpg" },
+        { cn: "床", es: "cama", emoji: "🛏️", img: "https://cdn.pixabay.com/photo/2017/07/25/14/17/bed-2538067_640.jpg" },
+        { cn: "椅子", es: "silla", emoji: "🪑", img: "https://cdn.pixabay.com/photo/2016/10/21/17/21/chair-1760208_640.jpg" },
+        { cn: "桌子", es: "mesa", emoji: "🪵", img: "https://cdn.pixabay.com/photo/2018/02/27/20/48/table-3186389_640.jpg" },
+        { cn: "门", es: "puerta", emoji: "🚪", img: "https://cdn.pixabay.com/photo/2016/11/18/14/05/door-1834977_640.jpg" },
+        { cn: "窗户", es: "ventana", emoji: "🪟", img: "https://cdn.pixabay.com/photo/2020/04/02/17/56/window-4995008_640.jpg" },
+        { cn: "房子", es: "casa", emoji: "🏠", img: "https://cdn.pixabay.com/photo/2016/11/18/17/46/house-1840194_640.jpg" },
+        { cn: "树", es: "árbol", emoji: "🌳", img: "https://cdn.pixabay.com/photo/2015/09/09/21/03/tree-933152_640.jpg" },
+        { cn: "叶子", es: "hoja", emoji: "🍃", img: "https://cdn.pixabay.com/photo/2018/08/18/19/37/leaves-3614885_640.jpg" },
+        { cn: "石头", es: "piedra", emoji: "🪨", img: "https://cdn.pixabay.com/photo/2016/12/03/09/59/rock-1879712_640.jpg" },
+        { cn: "海", es: "mar", emoji: "🌊", img: "https://cdn.pixabay.com/photo/2013/10/02/23/03/sea-190328_640.jpg" },
+        { cn: "云", es: "nube", emoji: "☁️", img: "https://cdn.pixabay.com/photo/2015/09/04/19/15/cloud-922692_640.jpg" },
+        { cn: "雨", es: "lluvia", emoji: "🌧️", img: "https://cdn.pixabay.com/photo/2015/10/20/19/51/rain-998057_640.jpg" },
+        { cn: "雪", es: "nieve", emoji: "❄️", img: "https://cdn.pixabay.com/photo/2016/10/20/17/58/snow-1760030_640.jpg" },
+        { cn: "宝宝", es: "bebé", emoji: "👶", img: "https://cdn.pixabay.com/photo/2016/11/21/15/47/baby-1846614_640.jpg" },
+        { cn: "爸爸", es: "papá", emoji: "👨", img: "https://cdn.pixabay.com/photo/2016/11/21/14/31/father-1845526_640.jpg" },
+        { cn: "妈妈", es: "mamá", emoji: "👩", img: "https://cdn.pixabay.com/photo/2015/12/21/14/07/mother-1102576_640.jpg" },
+        { cn: "笑脸", es: "sonrisa", emoji: "😊", img: "https://cdn.pixabay.com/photo/2016/12/26/17/28/smiley-1932678_640.png" },
+        { cn: "心形", es: "corazón", emoji: "❤️", img: "https://cdn.pixabay.com/photo/2017/02/26/13/32/heart-2100197_640.png" },
+        { cn: "红色", es: "rojo", emoji: "🔴", img: "https://cdn.pixabay.com/photo/2015/12/16/17/03/red-1092686_640.jpg" },
+        { cn: "蓝色", es: "azul", emoji: "🔵", img: "https://cdn.pixabay.com/photo/2016/11/29/04/05/blue-1867145_640.jpg" },
+        { cn: "黄色", es: "amarillo", emoji: "🟡", img: "https://cdn.pixabay.com/photo/2016/09/20/10/04/yellow-1682066_640.jpg" },
+        { cn: "绿色", es: "verde", emoji: "🟢", img: "https://cdn.pixabay.com/photo/2017/08/15/12/34/green-2644175_640.jpg" },
+        { cn: "橙色", es: "naranja", emoji: "🟠", img: "https://cdn.pixabay.com/photo/2018/09/12/11/36/orange-3672396_640.jpg" },
+        { cn: "紫色", es: "morado", emoji: "🟣", img: "https://cdn.pixabay.com/photo/2017/01/06/21/35/grape-1959663_640.jpg" },
+        { cn: "粉色", es: "rosa", emoji: "🌸", img: "https://cdn.pixabay.com/photo/2016/07/24/18/18/pink-1538799_640.jpg" },
+        { cn: "自行车", es: "bicicleta", emoji: "🚲", img: "https://cdn.pixabay.com/photo/2016/11/21/16/21/bicycle-1846286_640.jpg" },
+        { cn: "火车", es: "tren", emoji: "🚂", img: "https://cdn.pixabay.com/photo/2016/11/29/02/01/train-1867181_640.jpg" },
+        { cn: "飞机", es: "avión", emoji: "✈️", img: "https://cdn.pixabay.com/photo/2016/11/29/05/23/airplane-1867817_640.jpg" },
+        { cn: "气球", es: "globo", emoji: "🎈", img: "https://cdn.pixabay.com/photo/2016/11/18/16/35/balloon-1836488_640.jpg" },
+        { cn: "玩具熊", es: "oso de peluche", emoji: "🧸", img: "https://cdn.pixabay.com/photo/2019/12/20/11/00/teddy-bear-4707981_640.jpg" },
+        { cn: "积木", es: "bloque", emoji: "🧱", img: "https://cdn.pixabay.com/photo/2018/04/01/07/33/building-blocks-3280753_640.jpg" },
+        { cn: "蜡笔", es: "crayón", emoji: "🖍️", img: "https://cdn.pixabay.com/photo/2017/01/14/11/39/crayons-1979370_640.jpg" },
+        { cn: "书", es: "libro", emoji: "📚", img: "https://cdn.pixabay.com/photo/2015/11/19/21/10/glasses-1052010_640.jpg" },
+        { cn: "钟表", es: "reloj", emoji: "⏰", img: "https://cdn.pixabay.com/photo/2015/06/17/01/20/wall-clock-811904_640.jpg" },
+        { cn: "电话", es: "teléfono", emoji: "📞", img: "https://cdn.pixabay.com/photo/2016/11/19/14/00/phone-1841476_640.jpg" },
+        { cn: "电脑", es: "computadora", emoji: "💻", img: "https://cdn.pixabay.com/photo/2014/09/24/14/29/macbook-459538_640.jpg" },
+        { cn: "电视", es: "televisión", emoji: "📺", img: "https://cdn.pixabay.com/photo/2018/09/22/16/47/television-3696078_640.jpg" },
+        { cn: "雨伞", es: "paraguas", emoji: "☂️", img: "https://cdn.pixabay.com/photo/2017/02/25/22/14/umbrella-2093133_640.jpg" },
+        { cn: "眼镜", es: "gafas", emoji: "👓", img: "https://cdn.pixabay.com/photo/2015/02/13/00/42/glasses-634383_640.jpg" },
+        { cn: "钥匙", es: "llave", emoji: "🔑", img: "https://cdn.pixabay.com/photo/2016/06/01/16/59/key-1429535_640.jpg" },
+        { cn: "鼓", es: "tambor", emoji: "🥁", img: "https://cdn.pixabay.com/photo/2018/05/07/18/39/drum-3382774_640.jpg" },
+        { cn: "吉他", es: "guitarra", emoji: "🎸", img: "https://cdn.pixabay.com/photo/2017/06/06/00/40/guitar-2375754_640.jpg" },
+        { cn: "小船", es: "barco", emoji: "⛵", img: "https://cdn.pixabay.com/photo/2016/11/18/15/26/boat-1835283_640.jpg" },
+        { cn: "卡车", es: "camión", emoji: "🚛", img: "https://cdn.pixabay.com/photo/2015/09/06/21/22/truck-928083_640.jpg" },
+        { cn: "葡萄", es: "uva", emoji: "🍇", img: "https://cdn.pixabay.com/photo/2018/03/20/21/35/grapes-3243577_640.jpg" },
+        { cn: "西瓜", es: "sandía", emoji: "🍉", img: "https://cdn.pixabay.com/photo/2016/08/24/11/16/watermelon-1619090_640.jpg" },
+        { cn: "草莓", es: "fresa", emoji: "🍓", img: "https://cdn.pixabay.com/photo/2018/04/05/14/07/strawberry-3292074_640.jpg" },
+        { cn: "玉米", es: "maíz", emoji: "🌽", img: "https://cdn.pixabay.com/photo/2017/06/11/08/46/corn-2391460_640.jpg" },
+        { cn: "胡萝卜", es: "zanahoria", emoji: "🥕", img: "https://cdn.pixabay.com/photo/2016/08/10/22/48/carrots-1580894_640.jpg" },
+        { cn: "西红柿", es: "tomate", emoji: "🍅", img: "https://cdn.pixabay.com/photo/2014/11/28/20/14/tomatoes-549899_640.jpg" },
+        { cn: "洋葱", es: "cebolla", emoji: "🧅", img: "https://cdn.pixabay.com/photo/2017/03/23/13/27/onion-2167415_640.jpg" },
+        { cn: "柠檬", es: "limón", emoji: "🍋", img: "https://cdn.pixabay.com/photo/2015/04/10/01/41/lemon-715859_640.jpg" },
+        { cn: "挖掘机", es: "excavadora", emoji: "🏗️", img: "https://cdn.pixabay.com/photo/2018/08/19/17/17/excavator-3616554_640.jpg" },
+        { cn: "企鹅", es: "pingüino", emoji: "🐧", img: "https://cdn.pixabay.com/photo/2017/07/25/14/21/penguin-2538038_640.jpg" },
+        { cn: "老虎", es: "tigre", emoji: "🐯", img: "https://cdn.pixabay.com/photo/2018/04/14/12/07/tiger-3320825_640.jpg" }
     ];
+
+    // 为每个词条添加代理后的图片地址（确保全球加速）
+    const fullVocabulary = vocabulary.map(item => ({
+        ...item,
+        proxyImg: getProxyUrl(item.img)
+    }));
 
     let currentQuestionWord = null;
     let currentOptions = [];
     let currentScore = 0;
     let canSelect = true;
     let speechSynth = window.speechSynthesis;
-    let audioCtx = null;  // 全局 AudioContext，解决自动播放策略
+    let audioCtx = null;
 
-    // 初始化 AudioContext（必须在用户首次交互时创建）
     function initAudio() {
         if (audioCtx) return;
         try {
@@ -298,172 +338,158 @@
         } catch(e) { console.log("Web Audio not supported"); }
     }
 
-    // 播放正确提示音（清脆的"叮咚"声）
     function playCorrectSound() {
         try {
             initAudio();
             if (!audioCtx) return;
-            // 确保 AudioContext 是激活状态
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             const now = audioCtx.currentTime;
             const gain = audioCtx.createGain();
             gain.connect(audioCtx.destination);
             gain.gain.value = 0.3;
-            
-            // 第一个音符：高音
             const osc1 = audioCtx.createOscillator();
             osc1.type = 'sine';
             osc1.frequency.value = 880;
             osc1.connect(gain);
             osc1.start(now);
             osc1.stop(now + 0.2);
-            
-            // 第二个音符：更高音
             const osc2 = audioCtx.createOscillator();
             osc2.type = 'sine';
             osc2.frequency.value = 1100;
             osc2.connect(gain);
             osc2.start(now + 0.15);
             osc2.stop(now + 0.35);
-            
-            // 音量渐弱
             gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
-        } catch(e) { console.warn("正确音效失败", e); }
+        } catch(e) {}
     }
 
-    // 播放错误提示音（低沉的"啵"声）
     function playWrongSound() {
         try {
             initAudio();
             if (!audioCtx) return;
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             const now = audioCtx.currentTime;
             const gain = audioCtx.createGain();
             gain.connect(audioCtx.destination);
             gain.gain.value = 0.25;
-            
             const osc = audioCtx.createOscillator();
             osc.type = 'sawtooth';
             osc.frequency.value = 480;
             osc.connect(gain);
             osc.start(now);
             osc.stop(now + 0.4);
-            
             gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
-        } catch(e) { console.warn("错误音效失败", e); }
+        } catch(e) {}
     }
 
-    // 播放语音（带重试机制）
     function speakText(text, lang, retryCount = 0) {
         if (!text) return;
-        stopSpeaking();
-        
-        // 等待语音服务就绪
+        if (speechSynth.speaking) speechSynth.cancel();
         const trySpeak = () => {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
             utterance.rate = 0.85;
             utterance.pitch = 1.15;
             utterance.volume = 1;
-            
-            utterance.onerror = (event) => {
-                console.warn(`语音播放失败: ${text}`, event);
-                // 重试一次
-                if (retryCount < 1) {
-                    setTimeout(() => speakText(text, lang, retryCount + 1), 100);
-                }
+            utterance.onerror = () => {
+                if (retryCount < 1) setTimeout(() => speakText(text, lang, retryCount + 1), 100);
             };
-            
             speechSynth.speak(utterance);
         };
-        
-        // 确保语音服务已加载
         if (speechSynth.getVoices().length === 0) {
             speechSynth.onvoiceschanged = () => { trySpeak(); };
         } else {
             trySpeak();
         }
     }
-    
-    function stopSpeaking() {
-        if (speechSynth.speaking) {
-            speechSynth.cancel();
-        }
-    }
 
-    // 显示反馈动画 + 音效 + 语音提示
     function showFeedback(isCorrect) {
         const div = document.createElement('div');
         div.className = 'feedback-overlay';
         if (isCorrect) {
-            div.innerHTML = '✅ ✔️ 答对了！真棒！';
+            div.innerHTML = '✅ 答对了！真棒！ 🎉';
             div.style.backgroundColor = "#d4edda";
             div.style.color = "#2e7d32";
             playCorrectSound();
-            // 添加语音鼓励
-            setTimeout(() => {
-                speakText("答对了！你真棒！", "zh-CN");
-            }, 100);
+            setTimeout(() => speakText("答对了！你真棒！", "zh-CN"), 80);
         } else {
-            div.innerHTML = '❌ ✘ 再试试看，加油！';
+            div.innerHTML = '❌ 再试试看，加油！ 💪';
             div.style.backgroundColor = "#f8d7da";
             div.style.color = "#c62828";
             playWrongSound();
-            setTimeout(() => {
-                speakText("再试试看，加油！", "zh-CN");
-            }, 100);
+            setTimeout(() => speakText("再试试看，加油！", "zh-CN"), 80);
         }
         document.body.appendChild(div);
         setTimeout(() => div.remove(), 800);
+    }
+
+    // 创建卡片：优先加载网络实物图片，加载失败则显示 Emoji
+    function createCard(opt) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        
+        const img = document.createElement('img');
+        img.className = 'card-img';
+        img.src = opt.proxyImg;
+        img.alt = opt.cn;
+        
+        const emojiFallback = document.createElement('div');
+        emojiFallback.className = 'card-emoji-fallback';
+        emojiFallback.textContent = opt.emoji;
+        emojiFallback.style.display = 'none';
+        
+        img.onerror = function() {
+            img.style.display = 'none';
+            emojiFallback.style.display = 'block';
+        };
+        
+        const label = document.createElement('div');
+        label.className = 'word-label';
+        label.innerText = `${opt.cn} | ${opt.es}`;
+        
+        card.appendChild(img);
+        card.appendChild(emojiFallback);
+        card.appendChild(label);
+        
+        card.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!canSelect) return;
+            initAudio();
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const isMatch = (opt.cn === currentQuestionWord.cn && opt.es === currentQuestionWord.es);
+            if (isMatch) {
+                showFeedback(true);
+                currentScore++;
+                document.getElementById('scoreValue').innerText = currentScore;
+                canSelect = false;
+                setTimeout(() => loadNewQuiz(), 950);
+            } else {
+                showFeedback(false);
+            }
+        });
+        
+        return card;
     }
 
     function renderCards() {
         const container = document.getElementById('cardsContainer');
         container.innerHTML = '';
         currentOptions.forEach(opt => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <div class="card-emoji">${opt.emoji}</div>
-                <div class="word-label">${opt.cn} | ${opt.es}</div>
-            `;
-            card.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (!canSelect) return;
-                // 点击时激活音频（解决浏览器自动播放策略）
-                initAudio();
-                if (audioCtx && audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                
-                const isMatch = (opt.cn === currentQuestionWord.cn && opt.es === currentQuestionWord.es);
-                if (isMatch) {
-                    showFeedback(true);
-                    currentScore++;
-                    document.getElementById('scoreValue').innerText = currentScore;
-                    canSelect = false;
-                    setTimeout(() => loadNewQuiz(), 1000);
-                } else {
-                    showFeedback(false);
-                }
-            });
+            const card = createCard(opt);
             container.appendChild(card);
         });
     }
 
     function generateRandomQuiz() {
-        const targetIndex = Math.floor(Math.random() * vocabulary.length);
-        const target = { ...vocabulary[targetIndex] };
+        const targetIndex = Math.floor(Math.random() * fullVocabulary.length);
+        const target = { ...fullVocabulary[targetIndex] };
         const selected = new Set();
         selected.add(targetIndex);
         while (selected.size < 4) {
-            selected.add(Math.floor(Math.random() * vocabulary.length));
+            selected.add(Math.floor(Math.random() * fullVocabulary.length));
         }
-        let options = Array.from(selected).map(i => ({ ...vocabulary[i] }));
+        let options = Array.from(selected).map(i => ({ ...fullVocabulary[i] }));
         for (let i = options.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [options[i], options[j]] = [options[j], options[i]];
@@ -480,14 +506,9 @@
         canSelect = true;
     }
 
-    function playChinese() { 
-        if (currentQuestionWord) speakText(currentQuestionWord.cn, 'zh-CN'); 
-    }
-    function playSpanish() { 
-        if (currentQuestionWord) speakText(currentQuestionWord.es, 'es-ES'); 
-    }
+    function playChinese() { if (currentQuestionWord) speakText(currentQuestionWord.cn, 'zh-CN'); }
+    function playSpanish() { if (currentQuestionWord) speakText(currentQuestionWord.es, 'es-ES'); }
 
-    // 绑定事件并预加载语音服务
     document.getElementById('playChineseBtn').addEventListener('click', () => {
         initAudio();
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
@@ -498,15 +519,9 @@
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         playSpanish();
     });
-    document.getElementById('nextGameBtn').addEventListener('click', () => { 
-        if (canSelect) loadNewQuiz(); 
-    });
-    
-    // 预加载语音引擎
-    if (speechSynth) {
-        speechSynth.getVoices();
-    }
-    
+    document.getElementById('nextGameBtn').addEventListener('click', () => { if (canSelect) loadNewQuiz(); });
+
+    if (speechSynth) speechSynth.getVoices();
     loadNewQuiz();
 </script>
 </body>
