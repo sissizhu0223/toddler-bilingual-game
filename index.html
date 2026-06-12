@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>宝宝双语认知乐园 - 中文 & Español | Emoji趣味版</title>
+    <title>宝宝双语认知乐园 - 中文 & Español | 完整音效版</title>
     <style>
         * {
             box-sizing: border-box;
@@ -188,7 +188,7 @@
 </div>
 
 <script>
-    // Emoji 实物词库（无需下载图片，开箱即用）
+    // Emoji 实物词库（100+ 词）
     const vocabulary = [
         { cn: "苹果", es: "manzana", emoji: "🍎" },
         { cn: "香蕉", es: "plátano", emoji: "🍌" },
@@ -288,65 +288,137 @@
     let currentScore = 0;
     let canSelect = true;
     let speechSynth = window.speechSynthesis;
+    let audioCtx = null;  // 全局 AudioContext，解决自动播放策略
 
-    function stopSpeaking() { if (speechSynth.speaking) speechSynth.cancel(); }
-    function speakText(text, lang) {
-        if (!text) return;
-        stopSpeaking();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = lang;
-        utterance.rate = 0.85;
-        utterance.pitch = 1.15;
-        speechSynth.speak(utterance);
+    // 初始化 AudioContext（必须在用户首次交互时创建）
+    function initAudio() {
+        if (audioCtx) return;
+        try {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        } catch(e) { console.log("Web Audio not supported"); }
     }
 
+    // 播放正确提示音（清脆的"叮咚"声）
     function playCorrectSound() {
         try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const gain = ctx.createGain();
-            gain.connect(ctx.destination);
-            gain.gain.value = 0.25;
-            const osc1 = ctx.createOscillator();
+            initAudio();
+            if (!audioCtx) return;
+            // 确保 AudioContext 是激活状态
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const now = audioCtx.currentTime;
+            const gain = audioCtx.createGain();
+            gain.connect(audioCtx.destination);
+            gain.gain.value = 0.3;
+            
+            // 第一个音符：高音
+            const osc1 = audioCtx.createOscillator();
             osc1.type = 'sine';
             osc1.frequency.value = 880;
             osc1.connect(gain);
-            osc1.start();
-            osc1.stop(ctx.currentTime + 0.2);
-            const osc2 = ctx.createOscillator();
+            osc1.start(now);
+            osc1.stop(now + 0.2);
+            
+            // 第二个音符：更高音
+            const osc2 = audioCtx.createOscillator();
             osc2.type = 'sine';
             osc2.frequency.value = 1100;
             osc2.connect(gain);
-            osc2.start(ctx.currentTime + 0.1);
-            osc2.stop(ctx.currentTime + 0.35);
-            setTimeout(() => ctx.close(), 500);
-        } catch(e) {}
+            osc2.start(now + 0.15);
+            osc2.stop(now + 0.35);
+            
+            // 音量渐弱
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+        } catch(e) { console.warn("正确音效失败", e); }
     }
+
+    // 播放错误提示音（低沉的"啵"声）
     function playWrongSound() {
         try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const gain = ctx.createGain();
-            gain.connect(ctx.destination);
-            gain.gain.value = 0.2;
-            const osc = ctx.createOscillator();
+            initAudio();
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const now = audioCtx.currentTime;
+            const gain = audioCtx.createGain();
+            gain.connect(audioCtx.destination);
+            gain.gain.value = 0.25;
+            
+            const osc = audioCtx.createOscillator();
             osc.type = 'sawtooth';
             osc.frequency.value = 480;
             osc.connect(gain);
-            osc.start();
-            gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.45);
-            osc.stop(ctx.currentTime + 0.45);
-            setTimeout(() => ctx.close(), 500);
-        } catch(e) {}
+            osc.start(now);
+            osc.stop(now + 0.4);
+            
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.4);
+        } catch(e) { console.warn("错误音效失败", e); }
     }
+
+    // 播放语音（带重试机制）
+    function speakText(text, lang, retryCount = 0) {
+        if (!text) return;
+        stopSpeaking();
+        
+        // 等待语音服务就绪
+        const trySpeak = () => {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            utterance.rate = 0.85;
+            utterance.pitch = 1.15;
+            utterance.volume = 1;
+            
+            utterance.onerror = (event) => {
+                console.warn(`语音播放失败: ${text}`, event);
+                // 重试一次
+                if (retryCount < 1) {
+                    setTimeout(() => speakText(text, lang, retryCount + 1), 100);
+                }
+            };
+            
+            speechSynth.speak(utterance);
+        };
+        
+        // 确保语音服务已加载
+        if (speechSynth.getVoices().length === 0) {
+            speechSynth.onvoiceschanged = () => { trySpeak(); };
+        } else {
+            trySpeak();
+        }
+    }
+    
+    function stopSpeaking() {
+        if (speechSynth.speaking) {
+            speechSynth.cancel();
+        }
+    }
+
+    // 显示反馈动画 + 音效 + 语音提示
     function showFeedback(isCorrect) {
         const div = document.createElement('div');
         div.className = 'feedback-overlay';
-        div.innerHTML = isCorrect ? '✅ ✔️ 答对了！' : '❌ ✘ 再试试看';
-        if (isCorrect) div.style.backgroundColor = "#d4edda";
-        else div.style.backgroundColor = "#f8d7da";
+        if (isCorrect) {
+            div.innerHTML = '✅ ✔️ 答对了！真棒！';
+            div.style.backgroundColor = "#d4edda";
+            div.style.color = "#2e7d32";
+            playCorrectSound();
+            // 添加语音鼓励
+            setTimeout(() => {
+                speakText("答对了！你真棒！", "zh-CN");
+            }, 100);
+        } else {
+            div.innerHTML = '❌ ✘ 再试试看，加油！';
+            div.style.backgroundColor = "#f8d7da";
+            div.style.color = "#c62828";
+            playWrongSound();
+            setTimeout(() => {
+                speakText("再试试看，加油！", "zh-CN");
+            }, 100);
+        }
         document.body.appendChild(div);
-        setTimeout(() => div.remove(), 700);
-        if (isCorrect) playCorrectSound();
-        else playWrongSound();
+        setTimeout(() => div.remove(), 800);
     }
 
     function renderCards() {
@@ -359,15 +431,22 @@
                 <div class="card-emoji">${opt.emoji}</div>
                 <div class="word-label">${opt.cn} | ${opt.es}</div>
             `;
-            card.addEventListener('click', () => {
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
                 if (!canSelect) return;
+                // 点击时激活音频（解决浏览器自动播放策略）
+                initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                
                 const isMatch = (opt.cn === currentQuestionWord.cn && opt.es === currentQuestionWord.es);
                 if (isMatch) {
                     showFeedback(true);
                     currentScore++;
                     document.getElementById('scoreValue').innerText = currentScore;
                     canSelect = false;
-                    setTimeout(() => loadNewQuiz(), 800);
+                    setTimeout(() => loadNewQuiz(), 1000);
                 } else {
                     showFeedback(false);
                 }
@@ -401,13 +480,33 @@
         canSelect = true;
     }
 
-    function playChinese() { speakText(currentQuestionWord.cn, 'zh-CN'); }
-    function playSpanish() { speakText(currentQuestionWord.es, 'es-ES'); }
+    function playChinese() { 
+        if (currentQuestionWord) speakText(currentQuestionWord.cn, 'zh-CN'); 
+    }
+    function playSpanish() { 
+        if (currentQuestionWord) speakText(currentQuestionWord.es, 'es-ES'); 
+    }
 
-    document.getElementById('playChineseBtn').addEventListener('click', playChinese);
-    document.getElementById('playSpanishBtn').addEventListener('click', playSpanish);
-    document.getElementById('nextGameBtn').addEventListener('click', () => { if (canSelect) loadNewQuiz(); });
-
+    // 绑定事件并预加载语音服务
+    document.getElementById('playChineseBtn').addEventListener('click', () => {
+        initAudio();
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        playChinese();
+    });
+    document.getElementById('playSpanishBtn').addEventListener('click', () => {
+        initAudio();
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        playSpanish();
+    });
+    document.getElementById('nextGameBtn').addEventListener('click', () => { 
+        if (canSelect) loadNewQuiz(); 
+    });
+    
+    // 预加载语音引擎
+    if (speechSynth) {
+        speechSynth.getVoices();
+    }
+    
     loadNewQuiz();
 </script>
 </body>
