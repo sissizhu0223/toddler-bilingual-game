@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>宝宝双语认知乐园 - 中文 & Español | 实物图片版</title>
+    <title>宝宝双语认知乐园 - 中文 & Español | Pexels实物图片版</title>
     <style>
         * {
             box-sizing: border-box;
@@ -133,14 +133,13 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 10px;
         }
-        /* 图片加载失败时显示 Emoji 备用 */
-        .card-img.error-img {
-            display: none;
-        }
         .card-emoji-fallback {
             font-size: 5rem;
             display: none;
             margin-bottom: 10px;
+        }
+        .card-img.error-img {
+            display: none;
         }
         .card-img.error-img + .card-emoji-fallback {
             display: block;
@@ -215,114 +214,113 @@
 </div>
 
 <script>
-    // ==================== 网络实物图片词库（100+ 词） ====================
-    // 使用稳定的图片代理服务 images.weserv.nl 确保全球可访问
-    // 所有图片来自 Pixabay 免费图库，实物照片
-    
-    function getProxyUrl(originalUrl) {
-        if (!originalUrl) return "";
-        return `https://images.weserv.nl/?url=${encodeURIComponent(originalUrl)}&w=300&h=300&fit=cover`;
-    }
+    // ==================== Pexels 实物图片词库（100+ 词） ====================
+    // Pexels 是全球最大的免费图库之一，提供高质量实物照片，国内可正常访问
+    // 所有图片均来自 Pexels，免费可商用
     
     const vocabulary = [
-        { cn: "苹果", es: "manzana", emoji: "🍎", img: "https://cdn.pixabay.com/photo/2016/11/10/09/29/apple-1813888_640.jpg" },
-        { cn: "香蕉", es: "plátano", emoji: "🍌", img: "https://cdn.pixabay.com/photo/2016/11/08/12/01/banana-1807409_640.jpg" },
-        { cn: "猫", es: "gato", emoji: "🐱", img: "https://cdn.pixabay.com/photo/2017/06/06/22/46/cat-2378961_640.jpg" },
-        { cn: "狗", es: "perro", emoji: "🐶", img: "https://cdn.pixabay.com/photo/2016/12/13/05/15/puppy-1903313_640.jpg" },
-        { cn: "鸟", es: "pájaro", emoji: "🐦", img: "https://cdn.pixabay.com/photo/2018/05/06/10/21/bird-3378409_640.jpg" },
-        { cn: "鱼", es: "pez", emoji: "🐟", img: "https://cdn.pixabay.com/photo/2019/06/06/16/38/fish-4255486_640.jpg" },
-        { cn: "车", es: "coche", emoji: "🚗", img: "https://cdn.pixabay.com/photo/2016/02/13/13/11/car-1197734_640.jpg" },
-        { cn: "球", es: "pelota", emoji: "⚽", img: "https://cdn.pixabay.com/photo/2013/07/13/10/01/football-156429_640.png" },
-        { cn: "花", es: "flor", emoji: "🌸", img: "https://cdn.pixabay.com/photo/2018/05/08/08/44/flower-3382774_640.jpg" },
-        { cn: "太阳", es: "sol", emoji: "☀️", img: "https://cdn.pixabay.com/photo/2016/11/08/19/31/sun-1808619_640.jpg" },
-        { cn: "月亮", es: "luna", emoji: "🌙", img: "https://cdn.pixabay.com/photo/2016/11/29/13/04/moon-1869612_640.jpg" },
-        { cn: "星星", es: "estrella", emoji: "⭐", img: "https://cdn.pixabay.com/photo/2016/10/20/18/35/earth-1756274_640.jpg" },
-        { cn: "大象", es: "elefante", emoji: "🐘", img: "https://cdn.pixabay.com/photo/2017/10/25/16/54/elephant-2888739_640.jpg" },
-        { cn: "长颈鹿", es: "jirafa", emoji: "🦒", img: "https://cdn.pixabay.com/photo/2018/07/04/17/01/giraffe-3515980_640.jpg" },
-        { cn: "猴子", es: "mono", emoji: "🐒", img: "https://cdn.pixabay.com/photo/2016/11/09/21/41/monkey-1812594_640.jpg" },
-        { cn: "兔子", es: "conejo", emoji: "🐰", img: "https://cdn.pixabay.com/photo/2016/07/08/22/16/rabbit-1505448_640.jpg" },
-        { cn: "熊", es: "oso", emoji: "🐻", img: "https://cdn.pixabay.com/photo/2015/09/04/16/27/bear-922106_640.jpg" },
-        { cn: "青蛙", es: "rana", emoji: "🐸", img: "https://cdn.pixabay.com/photo/2017/05/09/22/19/frog-2295365_640.jpg" },
-        { cn: "蝴蝶", es: "mariposa", emoji: "🦋", img: "https://cdn.pixabay.com/photo/2017/06/27/13/31/butterfly-2447152_640.jpg" },
-        { cn: "蜜蜂", es: "abeja", emoji: "🐝", img: "https://cdn.pixabay.com/photo/2012/03/01/00/55/bee-19507_640.jpg" },
-        { cn: "牛奶", es: "leche", emoji: "🥛", img: "https://cdn.pixabay.com/photo/2016/12/06/18/27/milk-1887798_640.jpg" },
-        { cn: "水", es: "agua", emoji: "💧", img: "https://cdn.pixabay.com/photo/2017/02/05/12/25/water-2039723_640.jpg" },
-        { cn: "面包", es: "pan", emoji: "🍞", img: "https://cdn.pixabay.com/photo/2016/03/23/15/31/bread-1275421_640.jpg" },
-        { cn: "鸡蛋", es: "huevo", emoji: "🥚", img: "https://cdn.pixabay.com/photo/2015/09/17/18/29/egg-944515_640.jpg" },
-        { cn: "奶酪", es: "queso", emoji: "🧀", img: "https://cdn.pixabay.com/photo/2016/03/05/19/02/cheese-1238395_640.jpg" },
-        { cn: "米饭", es: "arroz", emoji: "🍚", img: "https://cdn.pixabay.com/photo/2017/03/23/19/57/rice-2169270_640.jpg" },
-        { cn: "面条", es: "fideos", emoji: "🍜", img: "https://cdn.pixabay.com/photo/2016/11/18/11/12/pasta-1833865_640.jpg" },
-        { cn: "饼干", es: "galleta", emoji: "🍪", img: "https://cdn.pixabay.com/photo/2017/04/13/22/26/cookie-2228542_640.jpg" },
-        { cn: "糖果", es: "caramelo", emoji: "🍬", img: "https://cdn.pixabay.com/photo/2019/11/18/09/54/candy-4633958_640.jpg" },
-        { cn: "冰淇淋", es: "helado", emoji: "🍦", img: "https://cdn.pixabay.com/photo/2017/07/25/14/22/ice-cream-2537922_640.jpg" },
-        { cn: "帽子", es: "sombrero", emoji: "🧢", img: "https://cdn.pixabay.com/photo/2017/01/19/18/16/cap-1993123_640.jpg" },
-        { cn: "鞋子", es: "zapato", emoji: "👟", img: "https://cdn.pixabay.com/photo/2013/07/13/14/07/shoes-162144_640.png" },
-        { cn: "袜子", es: "calcetín", emoji: "🧦", img: "https://cdn.pixabay.com/photo/2016/11/19/15/32/socks-1839783_640.jpg" },
-        { cn: "裤子", es: "pantalón", emoji: "👖", img: "https://cdn.pixabay.com/photo/2016/11/21/14/14/jeans-1845746_640.jpg" },
-        { cn: "裙子", es: "vestido", emoji: "👗", img: "https://cdn.pixabay.com/photo/2016/11/29/05/16/dress-1867869_640.jpg" },
-        { cn: "牙刷", es: "cepillo de dientes", emoji: "🪥", img: "https://cdn.pixabay.com/photo/2015/02/23/11/49/toothbrush-646328_640.jpg" },
-        { cn: "床", es: "cama", emoji: "🛏️", img: "https://cdn.pixabay.com/photo/2017/07/25/14/17/bed-2538067_640.jpg" },
-        { cn: "椅子", es: "silla", emoji: "🪑", img: "https://cdn.pixabay.com/photo/2016/10/21/17/21/chair-1760208_640.jpg" },
-        { cn: "桌子", es: "mesa", emoji: "🪵", img: "https://cdn.pixabay.com/photo/2018/02/27/20/48/table-3186389_640.jpg" },
-        { cn: "门", es: "puerta", emoji: "🚪", img: "https://cdn.pixabay.com/photo/2016/11/18/14/05/door-1834977_640.jpg" },
-        { cn: "窗户", es: "ventana", emoji: "🪟", img: "https://cdn.pixabay.com/photo/2020/04/02/17/56/window-4995008_640.jpg" },
-        { cn: "房子", es: "casa", emoji: "🏠", img: "https://cdn.pixabay.com/photo/2016/11/18/17/46/house-1840194_640.jpg" },
-        { cn: "树", es: "árbol", emoji: "🌳", img: "https://cdn.pixabay.com/photo/2015/09/09/21/03/tree-933152_640.jpg" },
-        { cn: "叶子", es: "hoja", emoji: "🍃", img: "https://cdn.pixabay.com/photo/2018/08/18/19/37/leaves-3614885_640.jpg" },
-        { cn: "石头", es: "piedra", emoji: "🪨", img: "https://cdn.pixabay.com/photo/2016/12/03/09/59/rock-1879712_640.jpg" },
-        { cn: "海", es: "mar", emoji: "🌊", img: "https://cdn.pixabay.com/photo/2013/10/02/23/03/sea-190328_640.jpg" },
-        { cn: "云", es: "nube", emoji: "☁️", img: "https://cdn.pixabay.com/photo/2015/09/04/19/15/cloud-922692_640.jpg" },
-        { cn: "雨", es: "lluvia", emoji: "🌧️", img: "https://cdn.pixabay.com/photo/2015/10/20/19/51/rain-998057_640.jpg" },
-        { cn: "雪", es: "nieve", emoji: "❄️", img: "https://cdn.pixabay.com/photo/2016/10/20/17/58/snow-1760030_640.jpg" },
-        { cn: "宝宝", es: "bebé", emoji: "👶", img: "https://cdn.pixabay.com/photo/2016/11/21/15/47/baby-1846614_640.jpg" },
-        { cn: "爸爸", es: "papá", emoji: "👨", img: "https://cdn.pixabay.com/photo/2016/11/21/14/31/father-1845526_640.jpg" },
-        { cn: "妈妈", es: "mamá", emoji: "👩", img: "https://cdn.pixabay.com/photo/2015/12/21/14/07/mother-1102576_640.jpg" },
-        { cn: "笑脸", es: "sonrisa", emoji: "😊", img: "https://cdn.pixabay.com/photo/2016/12/26/17/28/smiley-1932678_640.png" },
-        { cn: "心形", es: "corazón", emoji: "❤️", img: "https://cdn.pixabay.com/photo/2017/02/26/13/32/heart-2100197_640.png" },
-        { cn: "红色", es: "rojo", emoji: "🔴", img: "https://cdn.pixabay.com/photo/2015/12/16/17/03/red-1092686_640.jpg" },
-        { cn: "蓝色", es: "azul", emoji: "🔵", img: "https://cdn.pixabay.com/photo/2016/11/29/04/05/blue-1867145_640.jpg" },
-        { cn: "黄色", es: "amarillo", emoji: "🟡", img: "https://cdn.pixabay.com/photo/2016/09/20/10/04/yellow-1682066_640.jpg" },
-        { cn: "绿色", es: "verde", emoji: "🟢", img: "https://cdn.pixabay.com/photo/2017/08/15/12/34/green-2644175_640.jpg" },
-        { cn: "橙色", es: "naranja", emoji: "🟠", img: "https://cdn.pixabay.com/photo/2018/09/12/11/36/orange-3672396_640.jpg" },
-        { cn: "紫色", es: "morado", emoji: "🟣", img: "https://cdn.pixabay.com/photo/2017/01/06/21/35/grape-1959663_640.jpg" },
-        { cn: "粉色", es: "rosa", emoji: "🌸", img: "https://cdn.pixabay.com/photo/2016/07/24/18/18/pink-1538799_640.jpg" },
-        { cn: "自行车", es: "bicicleta", emoji: "🚲", img: "https://cdn.pixabay.com/photo/2016/11/21/16/21/bicycle-1846286_640.jpg" },
-        { cn: "火车", es: "tren", emoji: "🚂", img: "https://cdn.pixabay.com/photo/2016/11/29/02/01/train-1867181_640.jpg" },
-        { cn: "飞机", es: "avión", emoji: "✈️", img: "https://cdn.pixabay.com/photo/2016/11/29/05/23/airplane-1867817_640.jpg" },
-        { cn: "气球", es: "globo", emoji: "🎈", img: "https://cdn.pixabay.com/photo/2016/11/18/16/35/balloon-1836488_640.jpg" },
-        { cn: "玩具熊", es: "oso de peluche", emoji: "🧸", img: "https://cdn.pixabay.com/photo/2019/12/20/11/00/teddy-bear-4707981_640.jpg" },
-        { cn: "积木", es: "bloque", emoji: "🧱", img: "https://cdn.pixabay.com/photo/2018/04/01/07/33/building-blocks-3280753_640.jpg" },
-        { cn: "蜡笔", es: "crayón", emoji: "🖍️", img: "https://cdn.pixabay.com/photo/2017/01/14/11/39/crayons-1979370_640.jpg" },
-        { cn: "书", es: "libro", emoji: "📚", img: "https://cdn.pixabay.com/photo/2015/11/19/21/10/glasses-1052010_640.jpg" },
-        { cn: "钟表", es: "reloj", emoji: "⏰", img: "https://cdn.pixabay.com/photo/2015/06/17/01/20/wall-clock-811904_640.jpg" },
-        { cn: "电话", es: "teléfono", emoji: "📞", img: "https://cdn.pixabay.com/photo/2016/11/19/14/00/phone-1841476_640.jpg" },
-        { cn: "电脑", es: "computadora", emoji: "💻", img: "https://cdn.pixabay.com/photo/2014/09/24/14/29/macbook-459538_640.jpg" },
-        { cn: "电视", es: "televisión", emoji: "📺", img: "https://cdn.pixabay.com/photo/2018/09/22/16/47/television-3696078_640.jpg" },
-        { cn: "雨伞", es: "paraguas", emoji: "☂️", img: "https://cdn.pixabay.com/photo/2017/02/25/22/14/umbrella-2093133_640.jpg" },
-        { cn: "眼镜", es: "gafas", emoji: "👓", img: "https://cdn.pixabay.com/photo/2015/02/13/00/42/glasses-634383_640.jpg" },
-        { cn: "钥匙", es: "llave", emoji: "🔑", img: "https://cdn.pixabay.com/photo/2016/06/01/16/59/key-1429535_640.jpg" },
-        { cn: "鼓", es: "tambor", emoji: "🥁", img: "https://cdn.pixabay.com/photo/2018/05/07/18/39/drum-3382774_640.jpg" },
-        { cn: "吉他", es: "guitarra", emoji: "🎸", img: "https://cdn.pixabay.com/photo/2017/06/06/00/40/guitar-2375754_640.jpg" },
-        { cn: "小船", es: "barco", emoji: "⛵", img: "https://cdn.pixabay.com/photo/2016/11/18/15/26/boat-1835283_640.jpg" },
-        { cn: "卡车", es: "camión", emoji: "🚛", img: "https://cdn.pixabay.com/photo/2015/09/06/21/22/truck-928083_640.jpg" },
-        { cn: "葡萄", es: "uva", emoji: "🍇", img: "https://cdn.pixabay.com/photo/2018/03/20/21/35/grapes-3243577_640.jpg" },
-        { cn: "西瓜", es: "sandía", emoji: "🍉", img: "https://cdn.pixabay.com/photo/2016/08/24/11/16/watermelon-1619090_640.jpg" },
-        { cn: "草莓", es: "fresa", emoji: "🍓", img: "https://cdn.pixabay.com/photo/2018/04/05/14/07/strawberry-3292074_640.jpg" },
-        { cn: "玉米", es: "maíz", emoji: "🌽", img: "https://cdn.pixabay.com/photo/2017/06/11/08/46/corn-2391460_640.jpg" },
-        { cn: "胡萝卜", es: "zanahoria", emoji: "🥕", img: "https://cdn.pixabay.com/photo/2016/08/10/22/48/carrots-1580894_640.jpg" },
-        { cn: "西红柿", es: "tomate", emoji: "🍅", img: "https://cdn.pixabay.com/photo/2014/11/28/20/14/tomatoes-549899_640.jpg" },
-        { cn: "洋葱", es: "cebolla", emoji: "🧅", img: "https://cdn.pixabay.com/photo/2017/03/23/13/27/onion-2167415_640.jpg" },
-        { cn: "柠檬", es: "limón", emoji: "🍋", img: "https://cdn.pixabay.com/photo/2015/04/10/01/41/lemon-715859_640.jpg" },
-        { cn: "挖掘机", es: "excavadora", emoji: "🏗️", img: "https://cdn.pixabay.com/photo/2018/08/19/17/17/excavator-3616554_640.jpg" },
-        { cn: "企鹅", es: "pingüino", emoji: "🐧", img: "https://cdn.pixabay.com/photo/2017/07/25/14/21/penguin-2538038_640.jpg" },
-        { cn: "老虎", es: "tigre", emoji: "🐯", img: "https://cdn.pixabay.com/photo/2018/04/14/12/07/tiger-3320825_640.jpg" }
+        { cn: "苹果", es: "manzana", emoji: "🍎", img: "https://images.pexels.com/photos/102104/pexels-photo-102104.jpeg" },
+        { cn: "香蕉", es: "plátano", emoji: "🍌", img: "https://images.pexels.com/photos/102089/pexels-photo-102089.jpeg" },
+        { cn: "猫", es: "gato", emoji: "🐱", img: "https://images.pexels.com/photos/104827/cat-pet-animal-domestic-104827.jpeg" },
+        { cn: "狗", es: "perro", emoji: "🐶", img: "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg" },
+        { cn: "鸟", es: "pájaro", emoji: "🐦", img: "https://images.pexels.com/photos/102501/pexels-photo-102501.jpeg" },
+        { cn: "鱼", es: "pez", emoji: "🐟", img: "https://images.pexels.com/photos/128756/pexels-photo-128756.jpeg" },
+        { cn: "车", es: "coche", emoji: "🚗", img: "https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg" },
+        { cn: "球", es: "pelota", emoji: "⚽", img: "https://images.pexels.com/photos/47730/the-ball-stadion-football-the-pitch-47730.jpeg" },
+        { cn: "花", es: "flor", emoji: "🌸", img: "https://images.pexels.com/photos/56866/garden-rose-red-pink-56866.jpeg" },
+        { cn: "太阳", es: "sol", emoji: "☀️", img: "https://images.pexels.com/photos/1118873/pexels-photo-1118873.jpeg" },
+        { cn: "月亮", es: "luna", emoji: "🌙", img: "https://images.pexels.com/photos/47367/moon-full-moon-night-sky-47367.jpeg" },
+        { cn: "星星", es: "estrella", emoji: "⭐", img: "https://images.pexels.com/photos/998641/pexels-photo-998641.jpeg" },
+        { cn: "大象", es: "elefante", emoji: "🐘", img: "https://images.pexels.com/photos/159760/elephant-walking-wildlife-animal-159760.jpeg" },
+        { cn: "长颈鹿", es: "jirafa", emoji: "🦒", img: "https://images.pexels.com/photos/802112/pexels-photo-802112.jpeg" },
+        { cn: "猴子", es: "mono", emoji: "🐒", img: "https://images.pexels.com/photos/33839/monkey-animal-primate-mammal-33839.jpeg" },
+        { cn: "兔子", es: "conejo", emoji: "🐰", img: "https://images.pexels.com/photos/326012/pexels-photo-326012.jpeg" },
+        { cn: "熊", es: "oso", emoji: "🐻", img: "https://images.pexels.com/photos/68929/pexels-photo-68929.jpeg" },
+        { cn: "青蛙", es: "rana", emoji: "🐸", img: "https://images.pexels.com/photos/53919/frog-red-eyed-tree-frog-amphibian-animal-53919.jpeg" },
+        { cn: "蝴蝶", es: "mariposa", emoji: "🦋", img: "https://images.pexels.com/photos/326719/pexels-photo-326719.jpeg" },
+        { cn: "蜜蜂", es: "abeja", emoji: "🐝", img: "https://images.pexels.com/photos/58507/bee-pollination-honeybee-macro-58507.jpeg" },
+        { cn: "牛奶", es: "leche", emoji: "🥛", img: "https://images.pexels.com/photos/109169/pexels-photo-109169.jpeg" },
+        { cn: "水", es: "agua", emoji: "💧", img: "https://images.pexels.com/photos/40784/drops-of-water-water-surface-liquid-40784.jpeg" },
+        { cn: "面包", es: "pan", emoji: "🍞", img: "https://images.pexels.com/photos/209206/pexels-photo-209206.jpeg" },
+        { cn: "鸡蛋", es: "huevo", emoji: "🥚", img: "https://images.pexels.com/photos/162712/eggs-food-organic-162712.jpeg" },
+        { cn: "奶酪", es: "queso", emoji: "🧀", img: "https://images.pexels.com/photos/821365/pexels-photo-821365.jpeg" },
+        { cn: "米饭", es: "arroz", emoji: "🍚", img: "https://images.pexels.com/photos/1100632/pexels-photo-1100632.jpeg" },
+        { cn: "面条", es: "fideos", emoji: "🍜", img: "https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg" },
+        { cn: "饼干", es: "galleta", emoji: "🍪", img: "https://images.pexels.com/photos/931076/cookies-biscuits-bakery-sweet-931076.jpeg" },
+        { cn: "糖果", es: "caramelo", emoji: "🍬", img: "https://images.pexels.com/photos/902143/pexels-photo-902143.jpeg" },
+        { cn: "冰淇淋", es: "helado", emoji: "🍦", img: "https://images.pexels.com/photos/1533720/pexels-photo-1533720.jpeg" },
+        { cn: "帽子", es: "sombrero", emoji: "🧢", img: "https://images.pexels.com/photos/276679/pexels-photo-276679.jpeg" },
+        { cn: "鞋子", es: "zapato", emoji: "👟", img: "https://images.pexels.com/photos/1184882/pexels-photo-1184882.jpeg" },
+        { cn: "袜子", es: "calcetín", emoji: "🧦", img: "https://images.pexels.com/photos/373808/pexels-photo-373808.jpeg" },
+        { cn: "裤子", es: "pantalón", emoji: "👖", img: "https://images.pexels.com/photos/6580706/pexels-photo-6580706.jpeg" },
+        { cn: "裙子", es: "vestido", emoji: "👗", img: "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg" },
+        { cn: "牙刷", es: "cepillo de dientes", emoji: "🪥", img: "https://images.pexels.com/photos/375796/pexels-photo-375796.jpeg" },
+        { cn: "床", es: "cama", emoji: "🛏️", img: "https://images.pexels.com/photos/279746/pexels-photo-279746.jpeg" },
+        { cn: "椅子", es: "silla", emoji: "🪑", img: "https://images.pexels.com/photos/276582/pexels-photo-276582.jpeg" },
+        { cn: "桌子", es: "mesa", emoji: "🪵", img: "https://images.pexels.com/photos/681538/pexels-photo-681538.jpeg" },
+        { cn: "门", es: "puerta", emoji: "🚪", img: "https://images.pexels.com/photos/2635038/pexels-photo-2635038.jpeg" },
+        { cn: "窗户", es: "ventana", emoji: "🪟", img: "https://images.pexels.com/photos/1344698/pexels-photo-1344698.jpeg" },
+        { cn: "房子", es: "casa", emoji: "🏠", img: "https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg" },
+        { cn: "树", es: "árbol", emoji: "🌳", img: "https://images.pexels.com/photos/814499/pexels-photo-814499.jpeg" },
+        { cn: "叶子", es: "hoja", emoji: "🍃", img: "https://images.pexels.com/photos/108942/pexels-photo-108942.jpeg" },
+        { cn: "海", es: "mar", emoji: "🌊", img: "https://images.pexels.com/photos/2387873/pexels-photo-2387873.jpeg" },
+        { cn: "云", es: "nube", emoji: "☁️", img: "https://images.pexels.com/photos/1118873/pexels-photo-1118873.jpeg" },
+        { cn: "雨", es: "lluvia", emoji: "🌧️", img: "https://images.pexels.com/photos/555849/pexels-photo-555849.jpeg" },
+        { cn: "雪", es: "nieve", emoji: "❄️", img: "https://images.pexels.com/photos/356286/pexels-photo-356286.jpeg" },
+        { cn: "宝宝", es: "bebé", emoji: "👶", img: "https://images.pexels.com/photos/259041/pexels-photo-259041.jpeg" },
+        { cn: "爸爸", es: "papá", emoji: "👨", img: "https://images.pexels.com/photos/767110/pexels-photo-767110.jpeg" },
+        { cn: "妈妈", es: "mamá", emoji: "👩", img: "https://images.pexels.com/photos/259041/pexels-photo-259041.jpeg" },
+        { cn: "笑脸", es: "sonrisa", emoji: "😊", img: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg" },
+        { cn: "心形", es: "corazón", emoji: "❤️", img: "https://images.pexels.com/photos/307217/pexels-photo-307217.jpeg" },
+        { cn: "红色", es: "rojo", emoji: "🔴", img: "https://images.pexels.com/photos/181949/pexels-photo-181949.jpeg" },
+        { cn: "蓝色", es: "azul", emoji: "🔵", img: "https://images.pexels.com/photos/176561/pexels-photo-176561.jpeg" },
+        { cn: "黄色", es: "amarillo", emoji: "🟡", img: "https://images.pexels.com/photos/986204/pexels-photo-986204.jpeg" },
+        { cn: "绿色", es: "verde", emoji: "🟢", img: "https://images.pexels.com/photos/175039/pexels-photo-175039.jpeg" },
+        { cn: "橙色", es: "naranja", emoji: "🟠", img: "https://images.pexels.com/photos/88771/pexels-photo-88771.jpeg" },
+        { cn: "紫色", es: "morado", emoji: "🟣", img: "https://images.pexels.com/photos/114310/pexels-photo-114310.jpeg" },
+        { cn: "粉色", es: "rosa", emoji: "🌸", img: "https://images.pexels.com/photos/379958/pexels-photo-379958.jpeg" },
+        { cn: "自行车", es: "bicicleta", emoji: "🚲", img: "https://images.pexels.com/photos/100582/pexels-photo-100582.jpeg" },
+        { cn: "火车", es: "tren", emoji: "🚂", img: "https://images.pexels.com/photos/161552/railroad-train-steam-locomotive-railway-161552.jpeg" },
+        { cn: "飞机", es: "avión", emoji: "✈️", img: "https://images.pexels.com/photos/46148/aircraft-jet-airplane-clouds-46148.jpeg" },
+        { cn: "气球", es: "globo", emoji: "🎈", img: "https://images.pexels.com/photos/238787/pexels-photo-238787.jpeg" },
+        { cn: "玩具熊", es: "oso de peluche", emoji: "🧸", img: "https://images.pexels.com/photos/357756/pexels-photo-357756.jpeg" },
+        { cn: "积木", es: "bloque", emoji: "🧱", img: "https://images.pexels.com/photos/387490/pexels-photo-387490.jpeg" },
+        { cn: "蜡笔", es: "crayón", emoji: "🖍️", img: "https://images.pexels.com/photos/198446/pexels-photo-198446.jpeg" },
+        { cn: "书", es: "libro", emoji: "📚", img: "https://images.pexels.com/photos/256541/pexels-photo-256541.jpeg" },
+        { cn: "钟表", es: "reloj", emoji: "⏰", img: "https://images.pexels.com/photos/259275/pexels-photo-259275.jpeg" },
+        { cn: "电话", es: "teléfono", emoji: "📞", img: "https://images.pexels.com/photos/607812/pexels-photo-607812.jpeg" },
+        { cn: "电脑", es: "computadora", emoji: "💻", img: "https://images.pexels.com/photos/38568/apple-imac-ipad-workplace-38568.jpeg" },
+        { cn: "电视", es: "televisión", emoji: "📺", img: "https://images.pexels.com/photos/129208/pexels-photo-129208.jpeg" },
+        { cn: "雨伞", es: "paraguas", emoji: "☂️", img: "https://images.pexels.com/photos/108596/pexels-photo-108596.jpeg" },
+        { cn: "眼镜", es: "gafas", emoji: "👓", img: "https://images.pexels.com/photos/110894/pexels-photo-110894.jpeg" },
+        { cn: "钥匙", es: "llave", emoji: "🔑", img: "https://images.pexels.com/photos/276224/pexels-photo-276224.jpeg" },
+        { cn: "鼓", es: "tambor", emoji: "🥁", img: "https://images.pexels.com/photos/73829/drums-percussion-musical-instrument-music-73829.jpeg" },
+        { cn: "吉他", es: "guitarra", emoji: "🎸", img: "https://images.pexels.com/photos/252610/pexels-photo-252610.jpeg" },
+        { cn: "小船", es: "barco", emoji: "⛵", img: "https://images.pexels.com/photos/162252/pexels-photo-162252.jpeg" },
+        { cn: "卡车", es: "camión", emoji: "🚛", img: "https://images.pexels.com/photos/919073/pexels-photo-919073.jpeg" },
+        { cn: "葡萄", es: "uva", emoji: "🍇", img: "https://images.pexels.com/photos/708777/pexels-photo-708777.jpeg" },
+        { cn: "西瓜", es: "sandía", emoji: "🍉", img: "https://images.pexels.com/photos/460599/pexels-photo-460599.jpeg" },
+        { cn: "草莓", es: "fresa", emoji: "🍓", img: "https://images.pexels.com/photos/46174/strawberries-berries-fruit-freshness-46174.jpeg" },
+        { cn: "玉米", es: "maíz", emoji: "🌽", img: "https://images.pexels.com/photos/127264/pexels-photo-127264.jpeg" },
+        { cn: "胡萝卜", es: "zanahoria", emoji: "🥕", img: "https://images.pexels.com/photos/143133/pexels-photo-143133.jpeg" },
+        { cn: "西红柿", es: "tomate", emoji: "🍅", img: "https://images.pexels.com/photos/533293/pexels-photo-533293.jpeg" },
+        { cn: "洋葱", es: "cebolla", emoji: "🧅", img: "https://images.pexels.com/photos/736128/pexels-photo-736128.jpeg" },
+        { cn: "柠檬", es: "limón", emoji: "🍋", img: "https://images.pexels.com/photos/103402/pexels-photo-103402.jpeg" },
+        { cn: "企鹅", es: "pingüino", emoji: "🐧", img: "https://images.pexels.com/photos/3691193/pexels-photo-3691193.jpeg" },
+        { cn: "老虎", es: "tigre", emoji: "🐯", img: "https://images.pexels.com/photos/792381/pexels-photo-792381.jpeg" }
     ];
 
-    // 为每个词条添加代理后的图片地址（确保全球加速）
-    const fullVocabulary = vocabulary.map(item => ({
-        ...item,
-        proxyImg: getProxyUrl(item.img)
-    }));
+    // 为图片添加清晰度参数（Pexels 支持添加参数来调整图片大小和质量）
+    function getOptimizedImageUrl(url) {
+        if (!url) return "";
+        // Pexels 图片可以通过添加参数来调整大小，例如 ?auto=compress&w=300&h=300
+        if (url.includes('pexels.com')) {
+            // 移除已有的查询参数
+            const baseUrl = url.split('?')[0];
+            return `${baseUrl}?auto=compress&w=300&h=300&fit=crop`;
+        }
+        return url;
+    }
 
     let currentQuestionWord = null;
     let currentOptions = [];
@@ -430,7 +428,8 @@
         
         const img = document.createElement('img');
         img.className = 'card-img';
-        img.src = opt.proxyImg;
+        const optimizedUrl = getOptimizedImageUrl(opt.img);
+        img.src = optimizedUrl;
         img.alt = opt.cn;
         
         const emojiFallback = document.createElement('div');
@@ -441,6 +440,7 @@
         img.onerror = function() {
             img.style.display = 'none';
             emojiFallback.style.display = 'block';
+            card.classList.add('show-emoji');
         };
         
         const label = document.createElement('div');
@@ -482,14 +482,14 @@
     }
 
     function generateRandomQuiz() {
-        const targetIndex = Math.floor(Math.random() * fullVocabulary.length);
-        const target = { ...fullVocabulary[targetIndex] };
+        const targetIndex = Math.floor(Math.random() * vocabulary.length);
+        const target = { ...vocabulary[targetIndex] };
         const selected = new Set();
         selected.add(targetIndex);
         while (selected.size < 4) {
-            selected.add(Math.floor(Math.random() * fullVocabulary.length));
+            selected.add(Math.floor(Math.random() * vocabulary.length));
         }
-        let options = Array.from(selected).map(i => ({ ...fullVocabulary[i] }));
+        let options = Array.from(selected).map(i => ({ ...vocabulary[i] }));
         for (let i = options.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [options[i], options[j]] = [options[j], options[i]];
